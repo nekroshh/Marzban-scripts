@@ -1009,10 +1009,10 @@ install_command() {
 
     # Default values
     database_type="sqlite"
-    marzban_version="v0.7.0"
+    marzban_version="v0.7.0"  # Жестко установлена версия 0.7.0
     marzban_version_set="false"
 
-    # Parse options
+    # Парсим опции
     while [[ $# -gt 0 ]]; do
         key="$1"
         case $key in
@@ -1021,36 +1021,26 @@ install_command() {
                 shift 2
             ;;
             --dev)
-                if [[ "$marzban_version_set" == "true" ]]; then
-                    colorized_echo red "Error: Cannot use --dev and --version options simultaneously."
-                    exit 1
-                fi
-                marzban_version="dev"
-                marzban_version_set="true"
-                shift
+                colorized_echo red "Error: Версия --dev не поддерживается. Используется только версия v0.7.0."
+                exit 1
             ;;
             --version)
-                if [[ "$marzban_version_set" == "true" ]]; then
-                    colorized_echo red "Error: Cannot use --dev and --version options simultaneously."
-                    exit 1
-                fi
-                marzban_version="$2"
-                marzban_version_set="true"
-                shift 2
+                colorized_echo red "Error: Указание версии через --version не поддерживается. Используется только версия v0.7.0."
+                exit 1
             ;;
             *)
-                echo "Unknown option: $1"
+                echo "Неизвестная опция: $1"
                 exit 1
             ;;
         esac
     done
 
-    # Check if marzban is already installed
+    # Проверяем, установлен ли уже marzban
     if is_marzban_installed; then
-        colorized_echo red "Marzban is already installed at $APP_DIR"
-        read -p "Do you want to override the previous installation? (y/n) "
+        colorized_echo red "Marzban уже установлен в $APP_DIR"
+        read -p "Хотите перезаписать предыдущую установку? (y/n) "
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            colorized_echo red "Aborted installation"
+            colorized_echo red "Установка отменена"
             exit 1
         fi
     fi
@@ -1067,10 +1057,10 @@ install_command() {
     if ! command -v yq >/dev/null 2>&1; then
         install_yq
     fi
-    marzban_version="v0.7.0"
     detect_compose
     install_marzban_script
-    # Function to check if a version exists in the GitHub releases
+
+    # Функция для проверки, существует ли версия в релизах на GitHub
     check_version_exists() {
         local version=$1
         repo_url="https://api.github.com/repos/Gozargah/Marzban/releases"
@@ -1078,32 +1068,29 @@ install_command() {
             return 0
         fi
         
-        # Fetch the release data from GitHub API
+        # Получаем данные релизов с API GitHub
         response=$(curl -s "$repo_url")
         
-        # Check if the response contains the version tag
+        # Проверяем, содержится ли в ответе нужная версия
         if echo "$response" | jq -e ".[] | select(.tag_name == \"${version}\")" > /dev/null; then
             return 0
         else
             return 1
         fi
     }
-    # Check if the version is valid and exists
-    if [[ "$marzban_version" == "latest" || "$marzban_version" == "dev" || "$marzban_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        if check_version_exists "$marzban_version"; then
-            install_marzban "$marzban_version" "$database_type"
-            echo "Installing $marzban_version version"
-        else
-            echo "Version $marzban_version does not exist. Please enter a valid version (e.g. v0.5.2)"
-            exit 1
-        fi
+
+    # Проверка существования версии v0.7.0
+    if check_version_exists "$marzban_version"; then
+        install_marzban "$marzban_version" "$database_type"
+        echo "Устанавливается версия $marzban_version"
     else
-        echo "Invalid version format. Please enter a valid version (e.g. v0.5.2)"
+        echo "Версия $marzban_version не существует. Пожалуйста, убедитесь, что версия указана корректно."
         exit 1
     fi
     up_marzban
     follow_marzban_logs
 }
+
 
 install_yq() {
     if command -v yq &>/dev/null; then
