@@ -1009,7 +1009,7 @@ install_command() {
 
     # Default values
     database_type="sqlite"
-    marzban_version="0.7.0"
+    marzban_version="v0.7.0"
     marzban_version_set="false"
 
     # Parse options
@@ -1067,6 +1067,7 @@ install_command() {
     if ! command -v yq >/dev/null 2>&1; then
         install_yq
     fi
+    marzban_version="v0.7.0"
     detect_compose
     install_marzban_script
     # Function to check if a version exists in the GitHub releases
