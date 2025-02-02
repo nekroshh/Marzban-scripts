@@ -1087,8 +1087,6 @@ install_command() {
         echo "Версия $marzban_version не существует. Пожалуйста, убедитесь, что версия указана корректно."
         exit 1
     fi
-    up_marzban
-    follow_marzban_logs
 }
 
 
